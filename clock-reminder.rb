@@ -5,7 +5,7 @@ require 'curb'
 
 SHIFTPLANNING_API_KEY=
 SLACK_CHANNEL=
-SLACK_WEBHOOK_KEY=
+SLACK_WEBHOOK_KEY=""
 SLACK_WEBHOOK_URL="https://digitalocean.slack.com/services/hooks/incoming-webhook?token=#{SLACK_WEBHOOK_KEY}"
 SLACK_API_KEY=
 SCHEDULE = {
