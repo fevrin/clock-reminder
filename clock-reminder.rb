@@ -4,7 +4,7 @@ require 'time'
 require 'curb'
 
 SHIFTPLANNING_API_KEY=
-SLACK_CHANNEL=
+SLACK_CHANNEL=""
 SLACK_WEBHOOK_KEY=""
 SLACK_WEBHOOK_URL="https://digitalocean.slack.com/services/hooks/incoming-webhook?token=#{SLACK_WEBHOOK_KEY}"
 SLACK_API_KEY=
@@ -36,24 +36,32 @@ def get_time(format = "human")
          format = "%s"
          return Time.parse(Time.now.to_s,"#{format}").to_i
    end
-
-#   return %x(date +#{format}).chomp.to_i
 end
 
 def get_clock_status()
-   #run API call to get the status
+   #run API call to ShiftPlanning to get the clock-in status
    status="out"
    return status
 end
-puts get_time("human")
+
+def get_shift_time(time)
+   if (time =~ /(start|end)/) then
+      return Time.parse(SCHEDULE[get_day.downcase][time].to_s).strftime("%s").to_i
+   else
+      return nil
+   end
+end
+
 verbose(2, "it's " + get_day() + " at " + (Time.parse(Time.now.to_s,"%s").to_s) + "!")
 verbose(1, "it is " + get_day() + " at " + get_time("epoch").to_s + "!")
 verbose(2, "compare that to " + (Time.parse(SCHEDULE[get_day.downcase]["start"]).strftime("%s").to_i + 300).to_s + "!")
 verbose(3, ((SCHEDULE["monday"]["start"].to_i + 5).to_s + ":00"))
 
 def compare_clock_status()
-   compare_time_start = Time.parse(SCHEDULE[get_day.downcase]["start"].to_s).strftime("%s").to_i
-   compare_time_end = Time.parse(SCHEDULE[get_day.downcase]["end"].to_s).strftime("%s").to_i
+#check if it's been more than X minutes since my shift started or ended
+
+   compare_time_start = get_shift_time("start")
+   compare_time_end = get_shift_time("end")
 
    verbose(1, get_time("epoch").to_s + " > " + (compare_time_start + 300).to_s + "; status = " + get_clock_status)
 
@@ -71,14 +79,15 @@ def compare_clock_status()
    return message
 end
 
-#check if it's been more than X minutes since my shift started or ended
+def slack_it(message)
+   c = Curl::Easy.http_post("#{SLACK_WEBHOOK_URL}",
+   Curl::PostField.content('payload', %Q{{"channel": "##{SLACK_CHANNEL}", "username": "ShiftPlanning", "text": "Chrissy, #{message}", "icon_emoji": ":ghost:"}}))
+end
 
 #check if I have clocked in or out, as appropriate
 message = compare_clock_status()
 
-puts message
+verbose(1, message)
 
-#post the message to my testing channel
-#%x(curl -sX POST --data-urlencode 'payload={"channel": "##{SLACK_CHANNEL}", "username": "webhookbot", "text": "Chrissy, #{message}", "icon_emoji": ":ghost:"}' #{SLACK_WEBHOOK_URL})
-c = Curl::Easy.http_post("#{SLACK_WEBHOOK_URL}",
-Curl::PostField.content('payload', '{"channel": "##{SLACK_CHANNEL}", "username": "webhookbot", "text": "Chrissy, #{message}", "icon_emoji": ":ghost:"}'))
+#post the message to the specified channel
+slack_it(message)
