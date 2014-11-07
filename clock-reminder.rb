@@ -70,9 +70,7 @@ def spinner()
    end
 end
 
-def compare_clock_status()
-#check if it's been more than X minutes since my shift started or ended
-
+def print_timeline()
    compare_time_start = get_shift_time("start")
    compare_time_end = get_shift_time("end")
    current_time = get_time("epoch")
@@ -80,9 +78,6 @@ def compare_clock_status()
    if (compare_time_start.nil? || compare_time_end.nil?) then
       return nil
    else
-      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_start + 300)) + "; status = " + get_clock_status)
-      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_end + 300)) + "; status = " + get_clock_status)
-   
       # print out a timeline of where we are compared to the start and end of the shift
       timeline = [compare_time_start, compare_time_end, current_time].sort
 
@@ -95,8 +90,25 @@ def compare_clock_status()
       delimiter_b = ("." * ((((timeline[1] - timeline[2]).abs) / 1800).round.to_s).to_i).to_s
 
       timeline.each_index { |a| timeline[a] = get_time("human", Time.at(timeline[a])) }
-      verbose(1, timeline[0] + delimiter_a + timeline[1] + delimiter_b + timeline[2])
-   
+      puts timeline[0] + delimiter_a + timeline[1] + delimiter_b + timeline[2]
+   end
+end
+
+print_timeline()
+
+def compare_clock_status()
+#check if it's been more than X minutes since my shift started or ended
+
+   compare_time_start = get_shift_time("start")
+   compare_time_end = get_shift_time("end")
+   current_time = get_time("epoch")
+
+   if (compare_time_start.nil? || compare_time_end.nil?) then
+      return nil
+   else
+      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_start + 300)) + "; status = " + get_clock_status)
+      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_end + 300)) + "; status = " + get_clock_status)
+
       if current_time >= compare_time_start && get_clock_status == "in" then
          message="yay, you clocked in!"
       elsif current_time >= compare_time_end && get_clock_status == "out" then
