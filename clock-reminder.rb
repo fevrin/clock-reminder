@@ -28,13 +28,15 @@ def get_day()
 end
 
 def get_time(format = "human")
+   time = Time.now
+
    case format
       when "human"
          format = "%H:%M"
-         return Time.parse(Time.now.to_s,"#{format}")
+         return time.strftime("#{format}")
       when "epoch"
          format = "%s"
-         return Time.parse(Time.now.to_s,"#{format}").to_i
+         return time.strftime("#{format}").to_i
    end
 end
 
@@ -52,10 +54,8 @@ def get_shift_time(time)
    end
 end
 
-verbose(2, "it's " + get_day() + " at " + (Time.parse(Time.now.to_s,"%s").to_s) + "!")
-verbose(1, "it is " + get_day() + " at " + get_time("epoch").to_s + "!")
-verbose(2, "compare that to " + (Time.parse(SCHEDULE[get_day.downcase]["start"]).strftime("%s").to_i + 300).to_s + "!")
-verbose(3, ((SCHEDULE["monday"]["start"].to_i + 5).to_s + ":00"))
+verbose(1, "it is #{get_day()} at #{get_time("epoch").to_s} (#{get_time("human")})!")
+verbose(2, "compare that to " + (get_shift_time("start") + 300).to_s + "!")
 
 def compare_clock_status()
 #check if it's been more than X minutes since my shift started or ended
