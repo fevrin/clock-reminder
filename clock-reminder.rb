@@ -17,7 +17,7 @@ SCHEDULE = {
    "friday" => {"start" => nil, "end" => nil},
    "saturday" => {"start" => nil, "end" => nil}
 }
-VERBOSE=2
+VERBOSE=0
 
 def verbose(level = 1, string)
    puts string if VERBOSE >= 1 && VERBOSE >= level
@@ -106,16 +106,16 @@ def compare_clock_status()
    if (compare_time_start.nil? || compare_time_end.nil?) then
       return nil
    else
-      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_start + 300)) + "; status = " + get_clock_status)
-      verbose(1, get_time("human") + " > " + get_time("human",Time.at(compare_time_end + 300)) + "; status = " + get_clock_status)
+      verbose(1, get_time("human") + " >= " + get_time("human",Time.at(compare_time_start + 300)) + "; status = " + get_clock_status)
+      verbose(1, get_time("human") + " >= " + get_time("human",Time.at(compare_time_end + 300)) + "; status = " + get_clock_status)
 
       if current_time >= compare_time_start && get_clock_status == "in" then
          message="yay, you clocked in!"
       elsif current_time >= compare_time_end && get_clock_status == "out" then
          message="yay, you clocked out!"
-      elsif current_time > (compare_time_start + 300) && get_clock_status == "out" then
+      elsif current_time >= (compare_time_start + 300) && get_clock_status == "out" then
          message="don't forget to clock in!"
-      elsif current_time > (compare_time_end + 300) && get_clock_status == "in" then
+      elsif current_time >= (compare_time_end + 300) && get_clock_status == "in" then
          message="don't forget to clock out!"
       else
          message="what are you doing right now, babe?"
@@ -136,10 +136,10 @@ if (message.nil?) then
    puts "you don't work today!"
 else
    verbose(1, "it is #{get_day()} at #{get_time("epoch").to_s} (#{get_time("human")})!")
-   verbose(2, "compare that to " + (get_shift_time("start").to_i + 300).to_s + " (" + get_time("human",Time.at((get_shift_time("start").to_i + 300))) + ") - " + (get_shift_time("end").to_i + 300).to_s + " (" + get_time("human",Time.at((get_shift_time("end").to_i + 300))) + ")!")
+   verbose(1, "compare that to " + (get_shift_time("start").to_i + 300).to_s + " (" + get_time("human",Time.at((get_shift_time("start").to_i + 300))) + ") - " + (get_shift_time("end").to_i + 300).to_s + " (" + get_time("human",Time.at((get_shift_time("end").to_i + 300))) + ")!")
 
    #post the message to the specified channel
    slack_it(message)
 
-   verbose(1, message)
+   puts message
 end
